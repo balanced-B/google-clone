@@ -10,19 +10,30 @@ export const HomeSearch = () => {
     const [input, setInput] = useState('')
     const [luckyLoading, setLuckyLoading] = useState(false)
     const router = useRouter()
+
     const handleSubmit = (e) => {
         e.preventDefault() 
         if(!input.trim) return
-        router.push(`/search/web/web?searchTerm=${input}`)
+        router.push(`/search/web?searchTerm=${input}`)
     }
+    
     const randomSearch = async (e) => {
         setLuckyLoading(true)
-        const response = await fetch('https://random-word-api.herokuapp.com/word')
-        .then((res) => res.json())
-        .then((data) => data[0])
-        if(!response) return
-        router.push(`/search/web?searchTerm=${response}`)
-        setLuckyLoading(false)
+        try {
+            const response = await fetch('https://random-word-api.herokuapp.com/word');
+            if (!response.ok) {
+              throw new Error('Failed to fetch random word');
+            }
+            
+            const data = await response.json();
+            const randomWord = data[0];
+            router.push(`/search/web?searchTerm=${randomWord}`);
+          } catch (error) {
+            console.error('Fetch error:', error);
+            // Handle error state or display an error message
+          } finally {
+            setLuckyLoading(false);
+          }
     }
 
   return (
@@ -36,7 +47,8 @@ export const HomeSearch = () => {
         </form>
 
         <div className='flex flex-col space-y-2 sm:space-y-0 justify-center sm:flex-row mt-8 sm:space-x-4'>
-            <button className='bg-[#f8f9fa] rounded-md text-sm text-gray-800 hover:ring-gray-200 focus:outline-none active:ring-gray-300 hover:shadow-md w-36 h-10 transition-shadow' onClick={handleSubmit}>Google Search</button>
+            <button className='bg-[#f8f9fa] rounded-md text-sm text-gray-800 hover:ring-gray-200 focus:outline-none active:ring-gray-300 hover:shadow-md w-36 h-10 transition-shadow' onClick={handleSubmit}>Google Search
+            </button>
             <button
             disabled={luckyLoading}
             className='bg-[#f8f9fa] rounded-md text-sm text-gray-800 hover:ring-gray-200 focus:outline-none active:ring-gray-300 hover:shadow-md w-36 h-10 transition-shadow disabled:opacity-80 disabled:shadow-sm'
